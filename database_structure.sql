@@ -238,7 +238,7 @@ CREATE TABLE `restaurantes` (
   `codigo_postal` varchar(10) NOT NULL,
   `direccion` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,6 +247,7 @@ CREATE TABLE `restaurantes` (
 
 LOCK TABLES `restaurantes` WRITE;
 /*!40000 ALTER TABLE `restaurantes` DISABLE KEYS */;
+INSERT INTO `restaurantes` VALUES (1,'XTremo','+57 (301) 273 3067','Montería','230002','Calle 40#12-12'),(7,'Marco di Marco','+57 (300) 000 0000','Montería','230002','Calle 60#13-60'),(8,'Carlo di Carlo','+57 (300) 000 0000','Montería','230002','Calle 60#13-60');
 /*!40000 ALTER TABLE `restaurantes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -259,7 +260,7 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `restaurantes_AFTER_INSERT` AFTER INSERT ON `restaurantes` FOR EACH ROW BEGIN
-	INSERT INTO vlr_p_generales(valor, id_p_general, restaurante) VALUES ('agus.hdez2011@gmail.com', 1, NEW.id);
+	CALL generar_parametros_generales_default(new.id);
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -307,7 +308,7 @@ DROP TABLE IF EXISTS `vlr_p_generales`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vlr_p_generales` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `valor` varchar(45) NOT NULL,
+  `valor` text,
   `id_p_general` int NOT NULL,
   `restaurante` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -315,7 +316,7 @@ CREATE TABLE `vlr_p_generales` (
   KEY `fk_vlr_p_generales_restaurantes1_idx` (`restaurante`),
   CONSTRAINT `fk_vlr_p_generales_parametros_generales1` FOREIGN KEY (`id_p_general`) REFERENCES `parametros_generales` (`id`),
   CONSTRAINT `fk_vlr_p_generales_restaurantes1` FOREIGN KEY (`restaurante`) REFERENCES `restaurantes` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -324,6 +325,7 @@ CREATE TABLE `vlr_p_generales` (
 
 LOCK TABLES `vlr_p_generales` WRITE;
 /*!40000 ALTER TABLE `vlr_p_generales` DISABLE KEYS */;
+INSERT INTO `vlr_p_generales` VALUES (1,NULL,1,1),(2,NULL,2,1),(3,NULL,3,1),(4,NULL,4,1),(9,NULL,1,7),(10,NULL,2,7),(11,NULL,3,7),(12,NULL,4,7),(13,NULL,1,8),(14,NULL,2,8),(15,NULL,3,8),(16,NULL,4,8);
 /*!40000 ALTER TABLE `vlr_p_generales` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -334,6 +336,40 @@ UNLOCK TABLES;
 --
 -- Dumping routines for database 'reservas_restaurante'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `generar_parametros_generales_default` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generar_parametros_generales_default`(IN id_restaurante INTEGER)
+BEGIN
+    DECLARE pg_counter INTEGER;
+    DECLARE no_found BOOLEAN DEFAULT FALSE;
+    DECLARE id_pg CURSOR FOR SELECT id FROM parametros_generales;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_found = TRUE;
+    
+    OPEN id_pg;
+        
+    data_id: LOOP
+        FETCH id_pg INTO pg_counter;
+        IF no_found THEN
+            LEAVE data_id;
+        END IF;
+        INSERT INTO vlr_p_generales(id_p_general, restaurante) VALUES (pg_counter, id_restaurante);
+    END LOOP;
+    
+    CLOSE id_pg;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -344,4 +380,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-30 15:00:54
+-- Dump completed on 2024-09-03 21:08:56
